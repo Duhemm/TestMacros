@@ -6,6 +6,7 @@ case class D(x: A, y: B, z: C)
 object Test extends App {
   import Macros._
   import reflect.runtime.universe._
+  import reflect.api.Liftable
 
   val c1 = A("First value", 2)
   val c2 = B(1, "Second value")
