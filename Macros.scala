@@ -14,8 +14,8 @@ object Macros {
     val T = weakTypeOf[T]
     if (!T.typeSymbol.asClass.isCaseClass) c.abort(c.enclosingPosition, "Not a case class")
     else {
-      val params = T.members.collect { case x: TermSymbol if x.isVal && x.isCaseAccessor => q"$x" }.toList
-      q"new Liftable[$T] { def apply(universe: reflect.api.Universe, value: $T) = $T(..$params) }"
+      val params = T.members.collect { case x: MethodSymbol if x.isCaseAccessor => q"cc.$x" }.toList.reverse
+      q"new Liftable[$T] { def apply(universe: reflect.api.Universe, cc: $T) = new $T(..$params) }"
     }
   }
 
