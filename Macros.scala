@@ -15,8 +15,25 @@ object Macros {
     if (!T.typeSymbol.asClass.isCaseClass) c.abort(c.enclosingPosition, "Not a case class")
     else {
       val params = T.members.collect { case x: MethodSymbol if x.isCaseAccessor => q"cc.$x" }.toList.reverse
-      q"new Liftable[$T] { def apply(universe: reflect.api.Universe, cc: $T) = new $T(..$params) }"
+
+      val uref= Ident(newTermName("universe")) setType NoType
+      val tpe = c.reifyType(uref, EmptyTree, T, true)
+      val result= q"""
+        new Liftable[$T] {
+          def apply(universe: reflect.api.Universe, cc: $T): universe.Tree = {
+            
+            val ttree = universe.TypeTree($tpe)
+            
+            universe.Apply(universe.Select(universe.New(ttree), universe.nme.CONSTRUCTOR), List())
+            
+          }
+        }
+     """
+     uref setType null
+     result
+
     }
+
   }
 
 }
