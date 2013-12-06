@@ -1,3 +1,5 @@
+package foo
+
 import scala.reflect.macros.WhiteboxContext
 import scala.language.experimental.macros
 import scala.reflect.api.Liftable
@@ -16,21 +18,17 @@ object Macros {
     else {
       val params = T.members.collect { case x: MethodSymbol if x.isCaseAccessor => q"cc.$x" }.toList.reverse
 
-      val uref= Ident(newTermName("universe")) setType NoType
-      val tpe = c.reifyType(uref, EmptyTree, T, true)
-      val result= q"""
+      q"""
         new Liftable[$T] {
           def apply(universe: reflect.api.Universe, cc: $T): universe.Tree = {
             
-            val ttree = universe.TypeTree($tpe)
+            val ttree = universe.TypeTree(universe.typeOf[$T])
             
             universe.Apply(universe.Select(universe.New(ttree), universe.nme.CONSTRUCTOR), List())
             
           }
         }
      """
-     uref setType null
-     result
 
     }
 

@@ -1,3 +1,5 @@
+package foo
+
 case class A()
 case class B(x: Int, y: String)
 case class C(x: List[Int])
