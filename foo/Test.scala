@@ -32,7 +32,6 @@ object Test extends App {
     }
   }
 */
-  val a = List(1, 2, 3)
 
   val c1 = A(18)
   /* val c2 = B(1, "Second value")

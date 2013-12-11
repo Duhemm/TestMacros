@@ -16,19 +16,22 @@ object Macros {
     val T = weakTypeOf[T]
     if (!T.typeSymbol.asClass.isCaseClass) c.abort(c.enclosingPosition, "Not a case class")
     else {
-      //val params = T.members.collect { case x: MethodSymbol if x.isCaseAccessor => q"Select(Ident(TermName(cc)), TermName(x))" }.toList.reverse
+      val params = T.members.collect {
+        case x: MethodSymbol if x.isCaseAccessor =>
+          val name = x.name.decoded
+          q"""universe.Select(universe.Ident(universe.TermName("cc")), universe.TermName($name))"""
+      }.toList.reverse
+
       val name = T.typeSymbol.name.decoded // What is the difference between encoded and decoded ?
 
-      //println("PARAMS : " + showRaw(params))
-      
       q"""
         import scala.reflect.api.Liftable
         implicit object Foo extends Liftable[$T] {
           def apply(universe: reflect.api.Universe, cc: $T): universe.Tree = {
-            
+          
             val ttree = universe.Ident(universe.TermName($name))
             
-            universe.Apply(universe.Select(universe.New(ttree), universe.nme.CONSTRUCTOR), universe.Select(universe.Ident(universe.TermName(cc)), universe.TermName(x)))
+            universe.Apply(universe.Select(universe.New(ttree), universe.nme.CONSTRUCTOR), ..$params)
             
           }
         }
