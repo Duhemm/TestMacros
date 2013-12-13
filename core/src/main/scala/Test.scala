@@ -1,5 +1,3 @@
-package foo
-
 case class A(x: Int)
 case class B(x: Int, y: String)
 case class C(x: List[Int])
@@ -7,21 +5,21 @@ case class D(x: A, y: B, z: C)
 
 object Test extends App {
 
-  import foox.Macros._
+  import Macros._
   //import reflect.runtime.universe._
   import reflect.api.Liftable
   import scala.reflect.runtime.universe._
   import scala.reflect.runtime.currentMirror
-  
+
   /*implicit object liftA extends Liftable[A] {
     def apply(universe: reflect.api.Universe, cc: A): universe.Tree = {
 
       val ttree = universe.Ident(universe.TermName("A"))
 
       val t = universe.Ident(universe.TermName("A")) //universe.TypeTree(universe.typeOf[A])
-      
+
       println("TYPE : " + showRaw(t))
-      
+
       /*universe.Apply(
         universe.Apply(
           universe.Select(universe.New(universe.TypeTree(universe.typeOf[A])), universe.nme.CONSTRUCTOR),

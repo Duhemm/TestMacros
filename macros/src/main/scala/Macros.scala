@@ -1,5 +1,3 @@
-package foox
-
 import scala.reflect.macros.WhiteboxContext
 import scala.language.experimental.macros
 import scala.reflect.api.Liftable
@@ -28,18 +26,14 @@ object Macros {
         import scala.reflect.api.Liftable
         implicit object Foo extends Liftable[$T] {
           def apply(universe: reflect.api.Universe, cc: $T): universe.Tree = {
-          
+
             val ttree = universe.Ident(universe.TermName($name))
-            
-            universe.Apply(universe.Select(universe.New(ttree), universe.nme.CONSTRUCTOR), ..$params)
-            
+
+            universe.Apply(universe.Select(universe.New(ttree), universe.nme.CONSTRUCTOR), List(..$params))
           }
         }
         Foo
      """
-
     }
-
   }
-
 }
