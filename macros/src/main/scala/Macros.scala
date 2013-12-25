@@ -21,16 +21,15 @@ object Macros {
       }
 
       q"""
-        implicit object Foo extends scala.reflect.api.Liftable[$T] {
-          def apply(universe: scala.reflect.api.Universe, cc: $T): universe.Tree = {
-
-            val ttree = universe.Ident(universe.TermName(${T.typeSymbol.name.decoded}))
-
-            universe.Apply(universe.Select(universe.New(ttree), universe.nme.CONSTRUCTOR), List(..$params))
-          }
+      implicit object Foo extends scala.reflect.api.Liftable[$T] {
+        def apply(universe: scala.reflect.api.Universe, cc: $T): universe.Tree = {
+          val ttree = universe.Ident(universe.TermName(${T.typeSymbol.name.decoded}))
+      
+          universe.Apply(universe.Select(universe.New(ttree), universe.nme.CONSTRUCTOR), List(..$params))
         }
-        Foo
-     """
+      }
+      Foo
+    """
     }
   }
 }
