@@ -17,7 +17,7 @@ object Macros {
       val params = T.members.sorted.collect {
         case x: MethodSymbol if x.isCaseAccessor =>
           val tpe = x.returnType
-          q"implicitly[scala.reflect.api.Liftable[$tpe]].apply(universe, cc.${x.name})"
+          q"if(cc.${x.name} == null) null else implicitly[scala.reflect.api.Liftable[$tpe]].apply(universe, cc.${x.name})"
       }
 
       q"""
