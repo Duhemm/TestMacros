@@ -14,20 +14,17 @@ object Macros {
     val T = weakTypeOf[T]
     if (!T.typeSymbol.asClass.isCaseClass) c.abort(c.enclosingPosition, "Not a case class")
     else {
-      val params = T.members.collect {
+      val params = T.members.sorted.collect {
         case x: MethodSymbol if x.isCaseAccessor =>
-          val name = x.name.decoded
-          q"""universe.Select(universe.Ident(universe.TermName("cc")), universe.TermName($name))"""
-      }.toList.reverse
-
-      val name = T.typeSymbol.name.decoded // What is the difference between encoded and decoded ?
+          val tpe = x.returnType
+          q"implicitly[scala.reflect.api.Liftable[$tpe]].apply(universe, cc.${x.name})"
+      }
 
       q"""
-        import scala.reflect.api.Liftable
-        implicit object Foo extends Liftable[$T] {
-          def apply(universe: reflect.api.Universe, cc: $T): universe.Tree = {
+        implicit object Foo extends scala.reflect.api.Liftable[$T] {
+          def apply(universe: scala.reflect.api.Universe, cc: $T): universe.Tree = {
 
-            val ttree = universe.Ident(universe.TermName($name))
+            val ttree = universe.Ident(universe.TermName(${T.typeSymbol.name.decoded}))
 
             universe.Apply(universe.Select(universe.New(ttree), universe.nme.CONSTRUCTOR), List(..$params))
           }
