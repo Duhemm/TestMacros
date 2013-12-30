@@ -10,26 +10,35 @@ object Macros {
 
   def impl[T: c.WeakTypeTag](c: WhiteboxContext) = {
     import c.universe._
-
     val T = weakTypeOf[T]
+
     if (!T.typeSymbol.asClass.isCaseClass) c.abort(c.enclosingPosition, "Not a case class")
+    else if (c.enclosingImplicits.tail.exists(_.pt == c.enclosingImplicits.head.pt)) c.abort(c.enclosingPosition, "workaround")
     else {
       val params = T.members.sorted.collect {
         case x: MethodSymbol if x.isCaseAccessor =>
           val tpe = x.returnType
-          q"if(cc.${x.name} == null) null else implicitly[scala.reflect.api.Liftable[$tpe]].apply(universe, cc.${x.name})"
+          val liftMember = q"scala.Predef.implicitly[scala.reflect.api.Liftable[$tpe]].apply(universe, cc.${x.name})"
+
+          if (tpe.typeSymbol.asClass.isCaseClass) {
+            q"if(cc.${x.name} == null) null else $liftMember"
+          } else {
+            liftMember
+          }
       }
 
+      val objName = c.universe.TermName(c.freshName("LiftableFor" + T))
+
       q"""
-      implicit object Foo extends scala.reflect.api.Liftable[$T] {
+      implicit object $objName extends scala.reflect.api.Liftable[$T] {
         def apply(universe: scala.reflect.api.Universe, cc: $T): universe.Tree = {
-          val ttree = universe.Ident(universe.TermName(${T.typeSymbol.name.decoded}))
+          val ttree = universe.Ident(universe.TermName(${T.typeSymbol.name.encoded}))
       
-          universe.Apply(universe.Select(universe.New(ttree), universe.nme.CONSTRUCTOR), List(..$params))
+          universe.Apply(universe.Select(universe.New(ttree), universe.nme.CONSTRUCTOR), scala.collection.immutable.List(..$params))
         }
       }
-      Foo
-    """
+      $objName
+      """
     }
   }
 }
