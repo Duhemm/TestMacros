@@ -45,4 +45,37 @@ object Test extends App {
   println(r6)
   println(r7)
 
+  object Z {
+    object Y {
+      object X {
+        case class A(x: Int)
+        def foo = q"${A(2)}"
+      }
+    }
+  }
+
+  case class W() {
+    case class A(x: Int)
+
+    def foo = q"${A(2)}"
+  }
+
+  // Will cause compilation error
+  //  {
+  //    case class A(x: Int)
+  //    q"${A(2)}"
+  //  }
+
+  // Will cause compilation error
+  //  class C {
+  //    def foo = {
+  //      case class A(x: Int)
+  //      q"${A(2)}"
+  //    }
+  //  }
+
+  println(Z.Y.X.foo)
+
+  println(W().foo)
+
 }
