@@ -18,12 +18,13 @@ object Macros {
       val params = T.members.sorted.collect {
         case x: MethodSymbol if x.isCaseAccessor =>
           val tpe = x.returnType
+          val clssSymbol = tpe.typeSymbol.asClass
           val liftMember = q"scala.Predef.implicitly[scala.reflect.api.Liftable[$tpe]].apply(universe, cc.${x.name})"
 
-          if (tpe.typeSymbol.asClass.isCaseClass) {
-            q"if(cc.${x.name} == null) null else $liftMember"
-          } else {
+          if (clssSymbol.isPrimitive || clssSymbol.isDerivedValueClass) {
             liftMember
+          } else {
+            q"if(cc.${x.name} == null) null else $liftMember"
           }
       }
 
