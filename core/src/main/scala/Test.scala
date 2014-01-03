@@ -54,11 +54,12 @@ object Test extends App {
     }
   }
 
-  case class W() {
-    case class A(x: Int)
-
-    def foo = q"${A(2)}"
-  }
+  // Will cause compilation error
+  // case class W() {
+  //   case class A(x: Int)
+  // 
+  //   def foo = q"${A(2)}"
+  // }
 
   // Will cause compilation error
   //  {
@@ -75,7 +76,5 @@ object Test extends App {
   //  }
 
   println(Z.Y.X.foo)
-
-  println(W().foo)
 
 }

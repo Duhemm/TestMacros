@@ -14,7 +14,7 @@ object Macros {
     def isLocalCaseClass(sym: ClassSymbol): Boolean = {
       if (sym.isCaseClass) {
         val owner = sym.owner
-        !(owner.isPackage || owner.isClass && owner.isStatic)
+        !(owner.isPackage || owner.isClass && sym.isStatic)
       } else {
         false
       }
