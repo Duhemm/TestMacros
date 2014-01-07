@@ -11,20 +11,11 @@ object Macros {
   def impl[T: c.WeakTypeTag](c: WhiteboxContext) = {
     import c.universe._
 
-    def isLocalCaseClass(sym: ClassSymbol): Boolean = {
-      if (sym.isCaseClass) {
-        val owner = sym.owner
-        !(owner.isPackage || owner.isClass && sym.isStatic)
-      } else {
-        false
-      }
-    }
-
     val T = weakTypeOf[T]
     val TSymbol = T.typeSymbol.asClass
 
     if (!TSymbol.isCaseClass) c.abort(c.enclosingPosition, "Not a case class")
-    else if (isLocalCaseClass(TSymbol)) c.abort(c.enclosingPosition, "Cannot lift local classes")
+    else if (!TSymbol.isStatic) c.abort(c.enclosingPosition, "Cannot lift local classes")
     else if (c.enclosingImplicits.tail.exists(_.pt == c.enclosingImplicits.head.pt)) c.abort(c.enclosingPosition, "workaround")
     else {
       val params = T.members.sorted.collect {
